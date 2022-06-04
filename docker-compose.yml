@@ -1,0 +1,31 @@
+version: '3.5'
+services:
+  web-auth:
+    container_name: web-auth
+    hostname: web-auth
+    build: ./docker/web
+    env_file:
+      - .env
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./src:/src:delegated
+    ports:
+      - '8081:80'
+    entrypoint: ["nginx", "-g", "daemon off;"]
+
+  php-auth-server:
+    container_name: php-identity-server
+    hostname: php-auth-server
+    build: .
+    env_file:
+      - .env
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./src:/src:delegated
+    ports:
+      - '9004:9000'
+    entrypoint: [ "php-fpm", "-g", "daemon off;" ]
+
+networks:
+  default:
+    driver: bridge

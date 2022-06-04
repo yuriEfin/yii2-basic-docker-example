@@ -1,0 +1,66 @@
+stages:
+  - build
+  - check_rules_and_tests
+  - deploy
+
+build:
+  stage: build
+  image: docker
+  services:
+    - docker:dind
+  script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - docker pull $CI_REGISTRY_IMAGE:php-latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:php-latest --tag $CI_REGISTRY_IMAGE:php-$CI_COMMIT_SHA.$CI_PIPELINE_ID --tag $CI_REGISTRY_IMAGE:php-latest -f ./Dockerfile .
+    - docker push $CI_REGISTRY_IMAGE:php-latest
+    - docker push $CI_REGISTRY_IMAGE:php-$CI_COMMIT_SHA.$CI_PIPELINE_ID
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+  tags:
+    - test
+  artifacts:
+    paths:
+      - /builds
+
+check_rules_and_tests:
+  stage: check_rules_and_tests
+  needs: [ "build"]
+  image: $CI_REGISTRY_IMAGE:php-latest
+  services:
+    - docker:dind
+  before_script:
+    - ls -lah ./src && cd ./src
+    - echo ">>> CURL download composer..."
+    - curl -L https://getcomposer.org/installer >> composer-setup.php && php composer-setup.php
+  script:
+    - echo ">>> Composer install run..."
+    - php composer.phar install
+    - echo ">>> Composer install END >>>"
+
+    - echo ">>> PHPCS CHECK..."
+    - ./vendor/bin/phpcs -np --report=full --standard=ruleset.xml ./backend/ ./frontend/ ./common/
+    - echo ">>> PHPCS END >>>"
+
+    - echo ">>> TEST ..."
+    - ./vendor/bin/phpcs -np --report=full --standard=ruleset.xml ./backend/ ./frontend/ ./common/
+    - echo ">>> TEST END >>>"
+  tags:
+    - test
+  cache:
+    key: "$CI_COMMIT_REF_SLUG"
+  artifacts:
+    paths:
+      - /builds
+
+deploy:
+  stage: deploy
+  needs: ["build", "check_rules_and_tests"]
+  services:
+    - docker:dind
+  image:
+    name: docker
+  script:
+    - ssh root@212.109.192.158 -oStrictHostKeyChecking=no "mkdir -p /var/www/projects && cd /var/www/projects && ls -la "
+  when: manual
+  tags:
+    - test
