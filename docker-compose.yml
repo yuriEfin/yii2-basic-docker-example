@@ -11,7 +11,7 @@ services:
       - ./src:/src:delegated
     ports:
       - '8081:80'
-    entrypoint: ["nginx", "-g", "daemon off;"]
+    entrypoint: [ "nginx", "-g", "daemon off;" ]
 
   php-auth-server:
     container_name: php-identity-server
@@ -25,6 +25,17 @@ services:
     ports:
       - '9004:9000'
     entrypoint: [ "php-fpm", "-g", "daemon off;" ]
+
+  auth-server-mysql:
+    image: percona
+    container_name: 'auth-server-mysql'
+    hostname: 'auth-server-mysql'
+    ports:
+      - '3308:3306'
+    environment:
+      MYSQL_USER: percona
+      MYSQL_PASSWORD: qwqwqw
+      MYSQL_ROOT_PASSWORD: qwqwqw
 
 networks:
   default:

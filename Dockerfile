@@ -47,8 +47,8 @@ RUN docker-php-ext-install -j$(nproc) bz2 \
                                       gettext \
                                       intl \
                                       pcntl \
-                                      pdo_pgsql \
-                                      pgsql \
+                                      mysqli \
+                                      pdo_mysql \
                                       shmop \
                                       sockets \
                                       sysvmsg \
@@ -96,7 +96,7 @@ COPY ./src /src
 RUN curl -L https://getcomposer.org/installer >> composer-setup.php && \
       php composer-setup.php && \
       mv composer.phar /usr/local/bin/composer && \
-      composer config --global --auth github-oauth.github.com  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 && \
+      composer config --global --auth github-oauth.github.com  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 && \
       chmod -R 0777 /src/web/assets && \
       chmod -R 0777 /src/runtime
 
