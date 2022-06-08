@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace tests\unit\models;
 
 use app\models\ContactForm;
@@ -12,7 +14,7 @@ class ContactFormTest extends \Codeception\Test\Unit
      */
     public $tester;
 
-    public function testEmailIsSentOnContact()
+    public function testEmailIsSentOnContact(): void
     {
         $model = new ContactForm();
 

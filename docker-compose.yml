@@ -14,29 +14,51 @@ services:
     entrypoint: [ "nginx", "-g", "daemon off;" ]
 
   php-auth-server:
-    container_name: php-identity-server
+    container_name: php-auth-server
     hostname: php-auth-server
     build: .
+    environment:
+      - PHP_ENABLE_XDEBUG=1
+      - XDEBUG_CONFIG="serverName=web-auth.work remote_enable=1 remote_mode=req remote_port=9000 remote_host=172.17.0.1 idekey=PHPSTORM"
     env_file:
       - .env
     volumes:
       - ~/.composer-docker/cache:/root/.composer/cache:delegated
       - ./src:/src:delegated
     ports:
-      - '9004:9000'
+      - '9005:9000'
     entrypoint: [ "php-fpm", "-g", "daemon off;" ]
 
-  auth-server-mysql:
+  mysql-auth-server:
     image: percona
-    container_name: 'auth-server-mysql'
-    hostname: 'auth-server-mysql'
+    container_name: 'mysql-auth-server'
+    hostname: 'mysql-auth-server'
     ports:
       - '3308:3306'
     environment:
       MYSQL_USER: percona
       MYSQL_PASSWORD: qwqwqw
       MYSQL_ROOT_PASSWORD: qwqwqw
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql
+
+  redis-auth-server:
+    image: docker.io/bitnami/redis:7.0
+    container_name: 'redis-auth-server'
+    hostname: 'redis-auth-server'
+    environment:
+      # !!! ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - '6379:6379'
+    volumes:
+      - 'redis_data:/bitnami/redis/data'
 
 networks:
   default:
     driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use yii\helpers\Url;
 
 class LoginCest
 {
-    public function ensureThatLoginWorks(AcceptanceTester $I)
+    public function ensureThatLoginWorks(AcceptanceTester $I): void
     {
         $I->amOnPage(Url::toRoute('/site/login'));
         $I->see('Login', 'h1');

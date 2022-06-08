@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace tests\unit\models;
 
 use app\models\LoginForm;
@@ -8,12 +10,12 @@ class LoginFormTest extends \Codeception\Test\Unit
 {
     private $model;
 
-    protected function _after()
+    protected function _after(): void
     {
         \Yii::$app->user->logout();
     }
 
-    public function testLoginNoUser()
+    public function testLoginNoUser(): void
     {
         $this->model = new LoginForm([
             'username' => 'not_existing_username',
@@ -24,7 +26,7 @@ class LoginFormTest extends \Codeception\Test\Unit
         expect_that(\Yii::$app->user->isGuest);
     }
 
-    public function testLoginWrongPassword()
+    public function testLoginWrongPassword(): void
     {
         $this->model = new LoginForm([
             'username' => 'demo',
@@ -36,7 +38,7 @@ class LoginFormTest extends \Codeception\Test\Unit
         expect($this->model->errors)->hasKey('password');
     }
 
-    public function testLoginCorrect()
+    public function testLoginCorrect(): void
     {
         $this->model = new LoginForm([
             'username' => 'demo',
@@ -47,5 +49,4 @@ class LoginFormTest extends \Codeception\Test\Unit
         expect_not(\Yii::$app->user->isGuest);
         expect($this->model->errors)->hasntKey('password');
     }
-
 }
