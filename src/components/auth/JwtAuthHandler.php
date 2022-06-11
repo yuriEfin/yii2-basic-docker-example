@@ -2,19 +2,25 @@
 
 namespace app\components\auth;
 
-use yii\redis\Connection;
+use app\components\redis\RedisSentinelInterface;
+use PSRedis\HAClient;
+use Yii;
 
 class JwtAuthHandler
 {
     private const PREFIX_KEY = '_user_token_';
     
+    /**
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function handle(AuthEvent $event)
     {
-        /** @var Connection $redis */
-        $redis = \Yii::$app->redis;
+        /** @var HAClient $redis */
+        $redis = Yii::$app->redis;
         $token = $event->token;
-        if ($token) {
-            $redis->set(self::PREFIX_KEY . $token->getClaim('uid'), (string)$token);
-        }
+        $jwtParams = Yii::$app->params['jwt'];
+        $key = self::PREFIX_KEY . $token->getClaim('uid');
+        $strToken = (string)$token;
+        $redis->set($key, $strToken);
     }
 }

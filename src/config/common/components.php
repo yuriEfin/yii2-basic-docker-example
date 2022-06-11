@@ -1,18 +1,15 @@
 <?php
 
 use app\components\auth\JwtValidationData;
+use app\components\redis\RedisSentinelInterface;
 use sizeg\jwt\Jwt;
-use yii\redis\Connection as RedisConnection;
 
 $db = require dirname(__DIR__) . '/db.php';
 
 return [
     'db'    => $db,
     'redis' => [
-        'class'    => RedisConnection::class,
-        'hostname' => 'redis-auth-server',
-        'port'     => 6379,
-        'database' => 0,
+        'class' => RedisSentinelInterface::class,
     ],
     'i18n'  => [
         'translations' => [
@@ -30,7 +27,7 @@ return [
     ],
     'jwt'   => [
         'class'             => Jwt::class,
-        'key'               => 'file://' . (dirname(__DIR__, 2) . '/keys/jwtRS256.key.pub'), //typically a long random string
+        'key'               => 'file://' . (dirname(__DIR__, 2) . '/keys/jwtRS256.key.pub'),
         'jwtValidationData' => JwtValidationData::class,
     ],
 ];

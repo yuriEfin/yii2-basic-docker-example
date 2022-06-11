@@ -7,6 +7,5 @@ use yii\base\Event;
 
 class AuthEvent extends Event
 {
-    public int $user_id;
     public ?Token $token = null;
 }

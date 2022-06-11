@@ -19,6 +19,15 @@ use yii\web\ServerErrorHttpException;
 
 class AuthController extends Controller
 {
+    private const PREFIX_KEY = '_user_token_';
+    
+    public function init()
+    {
+        parent::init();
+        
+        $this->on(AuthEvent::class, [Yii::createObject(JwtAuthHandler::class), 'handle']);
+    }
+    
     public function behaviors(): array
     {
         $behaviors = parent::behaviors();
@@ -48,21 +57,12 @@ class AuthController extends Controller
             $token = $this->generateJwt($user);
             
             $this->generateRefreshToken($user);
-            Yii::$app->on(AuthEvent::class, [JwtAuthHandler::class, 'handle']);
-            Yii::$app->trigger(
-                AuthEvent::class,
-                new AuthEvent(
-                    [
-                        'user_id' => $model->user->getId(),
-                        'token'   => $token,
-                    ]
-                )
-            );
+            $this->triggerEvent($token);
             
             return [
                 'user'       => $user,
                 'token'      => (string)$token,
-                'tokenRedis' => Yii::$app->redis->get('_user_token_1'),
+                'tokenRedis' => var_export(Yii::$app->redis->get(self::PREFIX_KEY . $token->getClaim('uid')), true),
             ];
         }
         
@@ -87,6 +87,18 @@ class AuthController extends Controller
             ->expiresAt($time + $jwtParams['expire'])
             ->withClaim('uid', $user->id)
             ->getToken($signer, $key);
+    }
+    
+    private function triggerEvent($token)
+    {
+        $this->trigger(
+            AuthEvent::class,
+            new AuthEvent(
+                [
+                    'token' => $token,
+                ]
+            )
+        );
     }
     
     /**
