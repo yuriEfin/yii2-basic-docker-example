@@ -45,13 +45,10 @@ class User extends ActiveRecord implements IdentityInterface, UserCredentialsInt
     
     public static function findByUsername(string $username): ?User
     {
-        /** @var self $user */
-        $user = self::find()
+        return self::find()
             ->joinWith('profile')
             ->where(['login' => $username])
             ->one();
-        
-        return $user;
     }
     
     public function getId()
@@ -104,13 +101,10 @@ class User extends ActiveRecord implements IdentityInterface, UserCredentialsInt
     
     public function checkUserCredentials($username, $password): self
     {
-        /** @var self $user */
-        $user = self::find()
+        return self::find()
             ->joinWith('profile')
             ->where(['username' => $username, 'password' => $password])
             ->one();
-        
-        return $user;
     }
     
     public function getUserDetails($username)
