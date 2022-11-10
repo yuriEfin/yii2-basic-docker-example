@@ -69,6 +69,7 @@ class AuthController extends Controller
         return $model->getErrors();
     }
     
+    // @todo: Вынести в сервисный слой
     private function generateJwt(User $user)
     {
         /** @var Jwt $jwt */
@@ -101,9 +102,7 @@ class AuthController extends Controller
         );
     }
     
-    /**
-     * @throws yii\base\Exception
-     */
+    // @todo: Вынести в сервисный слой
     private function generateRefreshToken(\app\models\User $user, \app\models\User $impersonator = null): \app\models\UserRefreshToken
     {
         $refreshToken = Yii::$app->security->generateRandomString(200);
